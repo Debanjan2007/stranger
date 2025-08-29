@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homepage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .user-list {
+            margin: 20px 0;
+        }
+
+        .user-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        #popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        #popup-content {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to TeaApp</h1>
+    <div class="user-list">
+        <h2>Connected Users</h2>
+        <% if (connectedUsers && connectedUsers.length> 0) { %>
+            <% connectedUsers.forEach(function(user) { %>
+                <div class="user-item">
+                    <%= user.name %>
+                </div>
+                <% }); %>
+                    <% } else { %>
+                        <script>
+                            window.onload = function () {
+                                document.getElementById('popup').style.display = 'flex';
+                            }
+                        </script>
+                        <% } %>
+    </div>
+    <div id="popup">
+        <div id="popup-content">
+            <h2>No connections found</h2>
+            <p>You are not connected to any users. Would you like to join one?</p>
+            <button onclick="document.getElementById('popup').style.display='none'">Close</button>
+            <!-- Add your join logic here -->
+            <button>Join</button>
+        </div>
+    </div>
+</body>
+
+</html>

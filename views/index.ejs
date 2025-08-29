@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | Chat App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+    <div class="flex items-center justify-center w-full min-h-screen">
+        <form action="/login" method="POST" class="bg-gray-800 rounded-2xl shadow-2xl p-10 w-full max-w-md text-center flex flex-col items-center">
+            <h1 class="text-3xl font-bold mb-6 text-white">Login to Chat App</h1>
+            <div class="mb-4 w-full">
+                <label for="email" class="block text-gray-300 mb-2 text-left">Email</label>
+                <input type="email" id="email" name="email" required class="w-full px-4 py-2 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your email">
+            </div>
+            <div class="mb-6 w-full">
+                <label for="username" class="block text-gray-300 mb-2 text-left">Username</label>
+                <input type="text" id="username" name="username" required class="w-full px-4 py-2 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Choose a username">
+            </div>
+            <button type="submit" class="px-8 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition" onclick="login()">Log In</button>
+        </form>
+    </div>
+</body>
+<script>
+    const emailInput = document.querySelector("#email")
+    const userNameInput = document.querySelector("#username")
+    function login() {
+        if(emailInput.value === "" || userNameInput.value === ""){
+            alert("Please fill in all fields");
+            return;
+        }
+        
+    }
+</script>
+</html>
