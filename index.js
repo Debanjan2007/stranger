@@ -1,8 +1,9 @@
+import 'dotenv/config'
 import express from "express";
 import http from 'http'
 import { router } from './routes/index.routes.js'
 import { Server } from 'socket.io'
-import { connectDb } from "./db/db.connect.js";
+import { connectDB } from "./db/db.connect.js";
 
 const app = express();
 const port = 3000;
@@ -18,7 +19,7 @@ app.get('/', (req, res) => {
     res.render('index.ejs')
 })
 
-connectDb()
+connectDB()
     .then(() => {
         // here the http was needed because in case of websockets the first req is a http handshake req 
         // then it accepts the handshack amd a stable connection is established
