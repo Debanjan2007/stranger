@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Register | Chat App</title>
+    <!-- Use the official Tailwind CDN script (works well for prototypes) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6">
+    <div
+        class="w-full max-w-md bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl p-8 text-white">
+        <h1 class="text-2xl md:text-3xl font-bold mb-6 text-center">Create Account</h1>
+
+        <form id="registerForm" class="space-y-4" novalidate>
+            <!-- Email -->
+            <div class="relative">
+                <input id="email" name="email" type="email" placeholder=" " required
+                    class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-800/60 text-white border border-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
+                <label for="email" class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all
+               peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+               peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Email</label>
+            </div>
+
+            <!-- Username -->
+            <div class="relative">
+                <input id="username" name="username" type="text" placeholder=" " required
+                    class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-800/60 text-white border border-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
+                <label for="username" class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all
+               peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+               peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Username</label>
+            </div>
+
+            <!-- Password -->
+            <div class="relative">
+                <input id="password" name="password" type="password" placeholder=" " required
+                    class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-800/60 text-white border border-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
+                <label for="password" class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all
+               peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+               peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Password</label>
+
+                <!-- Strength bar -->
+                <div class="mt-3">
+                    <div class="w-full bg-gray-700 h-2 rounded overflow-hidden">
+                        <div id="strengthBar" class="h-full w-0 rounded transition-all"></div>
+                    </div>
+                    <p id="strengthText" class="mt-2 text-xs text-gray-400">Use at least 8+ characters with numbers &
+                        symbols.</p>
+                </div>
+            </div>
+
+            <!-- Confirm password -->
+            <div class="relative">
+                <input id="confirmPassword" name="confirmPassword" type="password" placeholder=" " required
+                    class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-800/60 text-white border border-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
+                <label for="confirmPassword" class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all
+               peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+               peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Confirm Password</label>
+                <p id="matchText" class="mt-2 text-xs"></p>
+            </div>
+
+            <button type="submit" class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition font-semibold">
+                Sign Up
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="my-6 flex items-center">
+            <div class="flex-grow h-px bg-gray-600"></div>
+            <span class="px-3 text-gray-400 text-sm lowercase">or</span>
+            <div class="flex-grow h-px bg-gray-600"></div>
+        </div>
+
+        <!-- Social signup -->
+        <div class="space-y-3">
+            <button
+                class="w-full py-2 bg-white text-gray-900 rounded-lg flex items-center justify-center gap-3 hover:brightness-95 transition">
+                <!-- Google icon (colored) -->
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google"
+                    class="w-5 h-5">
+                <span class="font-semibold">Sign up with Google</span>
+            </button>
+
+            <button
+                class="w-full py-2 bg-gray-800 text-white rounded-lg flex items-center justify-center gap-3 hover:bg-gray-700 transition">
+                <!-- GitHub icon - invert to ensure visibility on dark background -->
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"
+                    class="w-5 h-5 invert">
+                <span class="font-semibold">Sign up with GitHub</span>
+            </button>
+        </div>
+
+        <p class="mt-6 text-center text-sm text-gray-400">
+            Already have an account?
+            <a href="/" class="text-blue-400 hover:underline">Log in</a>
+        </p>
+    </div>
+
+    <script>
+        // Elements
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const strengthBar = document.getElementById('strengthBar');
+        const strengthText = document.getElementById('strengthText');
+        const matchText = document.getElementById('matchText');
+        const form = document.getElementById('registerForm');
+
+        // Utility: remove all possible bg color classes we use for the bar
+        const barColorClasses = ['bg-red-500', 'bg-amber-400', 'bg-yellow-300', 'bg-emerald-400', 'bg-green-400'];
+
+        function setBarColor(el, cls) {
+            el.classList.remove(...barColorClasses);
+            if (cls) el.classList.add(cls);
+        }
+
+        // Compute a simple strength score 0..4
+        function strengthScore(pw) {
+            let score = 0;
+            if (pw.length >= 8) score++;
+            if (/[A-Z]/.test(pw)) score++;
+            if (/\d/.test(pw)) score++;
+            if (/[^A-Za-z0-9]/.test(pw)) score++;
+            return score;
+        }
+
+        function updateStrength() {
+            const pw = password.value;
+            const score = strengthScore(pw);
+            const percent = Math.round((score / 4) * 100);
+            strengthBar.style.width = percent + '%';
+
+            // Color + text mapping
+            if (score <= 1) {
+                setBarColor(strengthBar, 'bg-red-500');
+                strengthText.textContent = 'Weak — try adding uppercase, numbers & symbols';
+                strengthText.className = 'mt-2 text-xs text-red-400';
+            } else if (score === 2) {
+                setBarColor(strengthBar, 'bg-amber-400');
+                strengthText.textContent = 'Medium — add symbols or length for more strength';
+                strengthText.className = 'mt-2 text-xs text-yellow-300';
+            } else if (score === 3) {
+                setBarColor(strengthBar, 'bg-emerald-400');
+                strengthText.textContent = 'Good — almost strong';
+                strengthText.className = 'mt-2 text-xs text-emerald-300';
+            } else { // 4
+                setBarColor(strengthBar, 'bg-green-400');
+                strengthText.textContent = 'Strong password';
+                strengthText.className = 'mt-2 text-xs text-green-300';
+            }
+        }
+
+        function updateMatch() {
+            const a = password.value;
+            const b = confirmPassword.value;
+            if (!b) {
+                matchText.textContent = '';
+                confirmPassword.classList.remove('ring-2', 'ring-red-500', 'ring-emerald-400');
+                return;
+            }
+            if (a === b) {
+                matchText.textContent = '✅ Passwords match';
+                matchText.className = 'mt-2 text-xs text-green-300';
+                confirmPassword.classList.remove('ring-2', 'ring-red-500');
+                confirmPassword.classList.add('ring-2', 'ring-emerald-400');
+            } else {
+                matchText.textContent = '❌ Passwords do not match';
+                matchText.className = 'mt-2 text-xs text-red-400';
+                confirmPassword.classList.remove('ring-2', 'ring-emerald-400');
+                confirmPassword.classList.add('ring-2', 'ring-red-500');
+            }
+        }
+
+        // Events
+        password.addEventListener('input', () => {
+            updateStrength();
+            updateMatch(); // also refresh match state while typing
+        });
+
+        confirmPassword.addEventListener('input', updateMatch);
+
+        // Final validation before submit
+        form.addEventListener('submit', (e) => {
+            const score = strengthScore(password.value);
+            if (score < 2) { // require at least medium
+                e.preventDefault();
+                alert('⚠️ Please choose a stronger password (min 8 chars, add numbers/symbols/uppercase).');
+                return;
+            }
+            if (password.value !== confirmPassword.value) {
+                e.preventDefault();
+                alert('⚠️ Passwords do not match.');
+                return;
+            }
+            // form will submit (or replace this with your AJAX call)
+            // e.g., e.preventDefault(); send fetch(...) etc.
+            alert('✅ Registration validated (placeholder). Proceed with your backend logic.');
+        });
+
+        // initialize visuals if there are pre-filled values
+        updateStrength();
+        updateMatch();
+    </script>
+</body>
+
+</html>

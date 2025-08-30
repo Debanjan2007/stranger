@@ -1,35 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Login | Chat App</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.0/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 flex items-center justify-center min-h-screen">
-    <div class="flex items-center justify-center w-full min-h-screen">
-        <form action="/login" method="POST" class="bg-gray-800 rounded-2xl shadow-2xl p-10 w-full max-w-md text-center flex flex-col items-center">
-            <h1 class="text-3xl font-bold mb-6 text-white">Login to Chat App</h1>
-            <div class="mb-4 w-full">
-                <label for="email" class="block text-gray-300 mb-2 text-left">Email</label>
-                <input type="email" id="email" name="email" required class="w-full px-4 py-2 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your email">
+
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div
+        class="w-full max-w-md p-8 rounded-2xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20 text-center">
+        <h1 class="text-3xl font-bold mb-6 text-white">Login to Chat App</h1>
+
+        <form id="loginForm" class="space-y-6">
+            <!-- Email -->
+            <div class="relative">
+                <input type="email" id="email" name="email"
+                    class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-900/40 text-white border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter your email" />
+                <label for="email"
+                    class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">
+                    Email
+                </label>
             </div>
-            <div class="mb-6 w-full">
-                <label for="username" class="block text-gray-300 mb-2 text-left">Username</label>
-                <input type="text" id="username" name="username" required class="w-full px-4 py-2 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Choose a username">
+
+            <!-- Username -->
+            <div class="relative">
+                <input type="text" id="username" name="username"
+                    class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-900/40 text-white border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Choose a username" />
+                <label for="username"
+                    class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">
+                    Username
+                </label>
             </div>
-            <button type="submit" class="px-8 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition" onclick="login()">Log In</button>
+
+            <!-- Login button -->
+            <button type="submit"
+                class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition">
+                Log In
+            </button>
         </form>
+
+        <!-- Divider -->
+        <div class="flex items-center my-6">
+            <hr class="flex-grow border-gray-600">
+            <span class="px-3 text-gray-400 text-sm">OR</span>
+            <hr class="flex-grow border-gray-600">
+        </div>
+
+        <!-- Social logins -->
+        <!-- Social logins -->
+        <div class="flex flex-col gap-3">
+            <!-- Google -->
+            <button
+                class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg shadow hover:bg-gray-100 transition">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5">
+                Log in with Google
+            </button>
+
+            <!-- GitHub -->
+            <button
+                class="w-full flex items-center justify-center gap-3 px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow hover:bg-gray-900 transition">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"
+                    class="w-6 h-6">
+                Log in with GitHub
+            </button>
+        </div>
+
+
+        <!-- Don't have an account -->
+        <p class="mt-6 text-gray-300">
+            Don’t have an account?
+            <a href="/api/client/register" class="text-blue-400 hover:underline">Sign Up</a>
+        </p>
     </div>
+
+    <script>
+        const form = document.getElementById("loginForm");
+        const email = document.getElementById("email");
+        const username = document.getElementById("username");
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault(); // prevent actual submit for now
+
+            if (email.value.trim() === "" || username.value.trim() === "") {
+                alert("⚠️ Please fill in both Email and Username before logging in.");
+                return;
+            }
+            // Proceed with form submission (e.g., send data to server)
+            const formData = {
+                email: email.value,
+                username: username.value
+            }
+            email.value = "";
+            username.value = "";
+        });
+    </script>
 </body>
-<script>
-    const emailInput = document.querySelector("#email")
-    const userNameInput = document.querySelector("#username")
-    function login() {
-        if(emailInput.value === "" || userNameInput.value === ""){
-            alert("Please fill in all fields");
-            return;
-        }
-        
-    }
-</script>
+
 </html>
