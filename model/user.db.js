@@ -1,31 +1,26 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const userSchema = mongoose.Schema({
-    email : {
-        type : String,
-        required : true,
-        unique : true
+    email: {
+        type: String,
+        required: true,
+        unique: true
     },
-    userName : {
-        type : String,
-        required : true,
-        unique : true
+    userName: {
+        type: String,
+        required: true,
+        unique: true
     },
-    password : {
-        type : String,
-        required : true
-    },
-    accessToken: {
+    password: {
         type: String,
         required: true
     },
     refreshToken: {
         type: String,
-        required: true
     }
-} , { timestamps: true })
+}, { timestamps: true })
 
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) return next();
@@ -44,24 +39,25 @@ userSchema.methods.genAccessToken = async () => {
             email: this.email,
             userName: this.userName
         },
-        process.env.JWT_SECRET,
+        process.env.JWT_REFRESH_SECRET,
         {
+            algorithm: "HS256",
             expiresIn: process.env.JWT_EXPIRES_IN
         }
     )
 }
-userSchema.methods.genRefreshToken = async () => {
+userSchema.methods.genRefreshToken = async (_id) => {
     jwt.sign(
         {
-            id: this._id,
+            id: _id,
         },
-        process.env.JWT_SECRET,
-        
+        process.env.JWT_REFRESH_SECRET,
+
         {
-            algorithm: process.env.JWT_ALGO,
+            algorithm: "HS256",
             expiresIn: process.env.JWT_EXPIRES_IN
         }
     )
 }
 
-export default mongoose.model("User", userSchema)
+export const User = mongoose.model("User", userSchema)

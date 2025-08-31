@@ -3,14 +3,22 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Login | Chat App</title>
+    <title>Login | AnnonymusChats</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
+<% if( typeof error !== 'undefined' && error === 'exists') { %>
+        <script>
+            alert("⚠️User already exists");
+        </script>
+    <% }else if(error === 'internal') { %>
+        <script>
+            alert("⚠️Internal Server Error");
+        </script>
+    <% } %>
 <body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
     <div
         class="w-full max-w-md p-8 rounded-2xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20 text-center">
-        <h1 class="text-3xl font-bold mb-6 text-white">Login to Chat App</h1>
+        <h1 class="text-3xl font-bold mb-6 text-white">Login to AnnonymusChats</h1>
 
         <form id="loginForm" class="space-y-6">
             <!-- Email -->

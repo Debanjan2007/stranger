@@ -20,8 +20,8 @@
                 <input id="email" name="email" type="email" placeholder=" " required
                     class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-800/60 text-white border border-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
                 <label for="email" class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all
-               peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
-               peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Email</label>
+                peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+                peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Email</label>
             </div>
 
             <!-- Username -->
@@ -29,8 +29,8 @@
                 <input id="username" name="username" type="text" placeholder=" " required
                     class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-800/60 text-white border border-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
                 <label for="username" class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all
-               peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
-               peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Username</label>
+                peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+                peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Username</label>
             </div>
 
             <!-- Password -->
@@ -38,8 +38,8 @@
                 <input id="password" name="password" type="password" placeholder=" " required
                     class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-800/60 text-white border border-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
                 <label for="password" class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all
-               peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
-               peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Password</label>
+                peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+                peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Password</label>
 
                 <!-- Strength bar -->
                 <div class="mt-3">
@@ -56,8 +56,8 @@
                 <input id="confirmPassword" name="confirmPassword" type="password" placeholder=" " required
                     class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-800/60 text-white border border-gray-700 outline-none focus:ring-2 focus:ring-blue-500" />
                 <label for="confirmPassword" class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all
-               peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
-               peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Confirm Password</label>
+                peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500
+                peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">Confirm Password</label>
                 <p id="matchText" class="mt-2 text-xs"></p>
             </div>
 
@@ -106,6 +106,8 @@
         const strengthText = document.getElementById('strengthText');
         const matchText = document.getElementById('matchText');
         const form = document.getElementById('registerForm');
+        const email = document.getElementById('email');
+        const userName = document.getElementById('username');
 
         // Utility: remove all possible bg color classes we use for the bar
         const barColorClasses = ['bg-red-500', 'bg-amber-400', 'bg-yellow-300', 'bg-emerald-400', 'bg-green-400'];
@@ -182,25 +184,42 @@
 
         // Final validation before submit
         form.addEventListener('submit', (e) => {
+            e.preventDefault(); // ✅ always prevent form reload
+
             const score = strengthScore(password.value);
-            if (score < 2) { // require at least medium
-                e.preventDefault();
+
+            if (score < 2) {
                 alert('⚠️ Please choose a stronger password (min 8 chars, add numbers/symbols/uppercase).');
                 return;
             }
+            if (!userName.value || !email.value) {
+                alert('⚠️ Please fill in all fields.');
+                return;
+            }
             if (password.value !== confirmPassword.value) {
-                e.preventDefault();
                 alert('⚠️ Passwords do not match.');
                 return;
             }
-            // form will submit (or replace this with your AJAX call)
-            // e.g., e.preventDefault(); send fetch(...) etc.
-            alert('✅ Registration validated (placeholder). Proceed with your backend logic.');
+
+            // ✅ safe to call now
+            regUser(email.value, password.value, userName.value);
         });
+
 
         // initialize visuals if there are pre-filled values
         updateStrength();
         updateMatch();
+
+        const regUser = (email, password, userName) => {
+            console.log("hello", email, password, userName);
+            fetch('http://localhost:3000/api/client/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email, password: password, userName: userName })
+            })
+        }
     </script>
 </body>
 

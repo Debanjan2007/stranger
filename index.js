@@ -16,7 +16,7 @@ app.set('view engine', 'ejs')
 app.use('/api/client', router)
 
 app.get('/', (req, res) => {
-    res.render('index.ejs')
+    res.render('index.ejs', { error: req.query.error });
 })
 
 connectDB()
