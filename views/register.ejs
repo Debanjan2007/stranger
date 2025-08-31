@@ -210,16 +210,23 @@
         updateStrength();
         updateMatch();
 
-        const regUser = (email, password, userName) => {
+        const regUser = async (email, password, userName) => {
             console.log("hello", email, password, userName);
-            fetch('http://localhost:3000/api/client/register', {
+            const res = await fetch('http://localhost:3000/api/client/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ email: email, password: password, userName: userName })
             })
+            const data = await res.json();
+            if(data.success){
+                window.location.href = data.render;
+            }else{
+                window.location.href = data.redirect;
+            }
         }
+
     </script>
 </body>
 

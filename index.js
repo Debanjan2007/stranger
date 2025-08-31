@@ -4,21 +4,31 @@ import http from 'http'
 import { router } from './routes/index.routes.js'
 import { Server } from 'socket.io'
 import { connectDB } from "./db/db.connect.js";
+import cookieParser from 'cookie-parser';
+import path from 'path';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const port = 3000;
-
 
 // parsing the middlewares 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs')
-app.use('/api/client', router)
+app.set('views', path.join(__dirname, 'views'));
+app.use('/api/client', router);
+app.use(cookieParser());
 
-app.get('/', (req, res) => {
+
+app.get('/', (req, res) => {   
     res.render('index.ejs', { error: req.query.error });
 })
-
+app.get('/homepage', (req, res) => {
+    res.render('homepage.ejs');
+})
 connectDB()
     .then(() => {
         // here the http was needed because in case of websockets the first req is a http handshake req 
