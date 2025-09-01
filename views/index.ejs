@@ -10,12 +10,17 @@
             <script>
                 alert("⚠️User already exists");
             </script>
-        <% }else if(error==='internal' ) { %>
+        <% } %>
+        <% if(error==='internal' ) { %>
             <script>
                 alert("⚠️Internal Server Error");
             </script>
         <% } %>
-
+        <% if(error==='unauthorized' ) { %>
+            <script>
+                alert("⚠️Unauthorized access");
+            </script>
+        <% } %>
             <body
                 class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
                 <div
@@ -30,20 +35,20 @@
                                 placeholder="Enter your email" />
                             <label for="email"
                                 class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">
-                                Email
+                                Email or userName
                             </label>
                         </div>
 
-                        <!-- Username -->
+                        <!-- Password -->
                         <div class="relative">
-                            <input type="text" id="username" name="username"
+                            <input type="password" id="password" name="password"
                                 class="peer w-full px-4 pt-5 pb-2 rounded-lg bg-gray-900/40 text-white border border-gray-600 placeholder-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Choose a username" />
-                            <label for="username"
+                                placeholder="Enter your password" />
+                            <label for="password"
                                 class="absolute left-4 top-2.5 text-gray-400 text-sm transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base peer-focus:top-2.5 peer-focus:text-sm peer-focus:text-blue-400">
-                                Username
+                                Password
                             </label>
-                        </div>
+                        </div
 
                         <!-- Login button -->
                         <button type="submit"
@@ -90,22 +95,32 @@
                 <script>
                     const form = document.getElementById("loginForm");
                     const email = document.getElementById("email");
-                    const username = document.getElementById("username");
+                    const password = document.getElementById("password");
 
-                    form.addEventListener("submit", function (e) {
-                        e.preventDefault(); // prevent actual submit for now
-
-                        if (email.value.trim() === "" || username.value.trim() === "") {
-                            alert("⚠️ Please fill in both Email and Username before logging in.");
+                    form.addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        if (email.value.trim() === "" || password.value.trim() === "") {
+                            alert("⚠️ Please fill in both Email and Password before logging in.");
                             return;
-                        }
-                        // Proceed with form submission (e.g., send data to server)
+                        }                       
+                        // send data to server
                         const formData = {
                             email: email.value,
-                            username: username.value
+                            password: password.value
                         }
-                        email.value = "";
-                        username.value = "";
+                        const res = await fetch("http://localhost:3000/api/client/login", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(formData)
+                        });
+                        const data  = await res.json();
+                        if(data.session){
+                            window.location.href = `http://localhost:3000/homepage?session=${data.session}`
+                        }else{
+                            window.location.href = `http://localhost:3000/?error=${data.error}`
+                        }
                     });
                 </script>
             </body>

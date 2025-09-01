@@ -221,8 +221,10 @@
             })
             const data = await res.json();
             if(data.success){
-                window.location.href = data.render;
+                alert('✅ Registration successful!');
+                window.location.href = `${data.render}?session=${data.session}`;
             }else{
+                alert('❌ Registration failed: ' + data.message);
                 window.location.href = data.redirect;
             }
         }

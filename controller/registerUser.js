@@ -16,13 +16,8 @@ const registerUser = asyncHandler(async (req , res) => {
 
         user.refreshToken = refreshToken;
         await user.save();
-
-        res.cookie('accessToken' , accessToken , {
-            httpOnly: true,
-            secure: false,
-            maxAge: 30 * 60 * 1000 // 30 minutes
-        })
-        return res.json({ success: true, render: "/homepage" });
+        
+        return res.json({ success: true, render: "/homepage" , session: accessToken });
     } catch (error) {
         if(error){
         console.error("error:", error);

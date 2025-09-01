@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import jwt from 'jsonwebtoken';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -27,7 +28,15 @@ app.get('/', (req, res) => {
     res.render('index.ejs', { error: req.query.error });
 })
 app.get('/homepage', (req, res) => {
-    res.render('homepage.ejs');
+    const session = req.query.session;
+    console.log(typeof session);
+    const sessionChecked = jwt.verify(session , process.env.JWT_REFRESH_SECRET);
+    if(session && sessionChecked){
+        res.render('homepage.ejs' , {session: session});
+    }
+    else{
+        res.redirect('/?error=unauthorized');
+    }
 })
 connectDB()
     .then(() => {
