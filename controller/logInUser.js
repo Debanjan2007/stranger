@@ -15,8 +15,14 @@ const logInUser = asyncHandler(async (req , res) => {
 
     user.refreshToken = refreshToken ;    
     await user.save() ;
+    res.cookie('session' , accessToken , {
+            httpOnly: false, 
+            secure: false, // not using https
+            sameSite: "strict",
+            maxAge: 24 * 60 * 60 * 1000 // max time 1 day
+        })
     return res
-    .json({ success: true , session: accessToken });
+    .json({ success: true });
 })
 
 export {

@@ -19,7 +19,13 @@ const userSchema = mongoose.Schema({
     },
     refreshToken: {
         type: String,
-    }
+    },
+    teams:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Team'
+        }
+    ]
 }, { timestamps: true })
 
 userSchema.pre("save", async function (next) {

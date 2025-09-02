@@ -113,11 +113,12 @@
                             headers: {
                                 "Content-Type": "application/json"
                             },
-                            body: JSON.stringify(formData)
+                            body: JSON.stringify(formData),
+                            credentials: "include" 
                         });
                         const data  = await res.json();
-                        if(data.session){
-                            window.location.href = `http://localhost:3000/homepage?session=${data.session}`
+                        if(data){
+                            window.location.href = `http://localhost:3000/homepage`
                         }else{
                             window.location.href = `http://localhost:3000/?error=${data.error}`
                         }

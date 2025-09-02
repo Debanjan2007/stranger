@@ -2,6 +2,10 @@ import express from "express";
 import multer from "multer";
 import { registerUser } from "../controller/registerUser.js";
 import { logInUser } from "../controller/logInUser.js"
+import { unAuthorisedHandler } from '../middleware/unauthorisedHandler.js'
+import { verifyJwt } from '../middleware/jwt.Verify.js'
+import { createTeamHandler }  from '../controller/createteam.js'
+
 const router = express.Router() ;
 
 const uploader = multer() ;
@@ -19,15 +23,15 @@ router.post('/login',
     uploader.none(),
     logInUser
 )
-router.get('/create-room' , (req , res) => {
-    console.log(req.cookies);
-    const session = req.session;
-    console.log(session);
-    if (!session) {
-        return res.redirect("http://localhost:3000/?error=unauthorized");
-    }
-    res.render('create-room.ejs');
+router.get('/create-room' , 
+    unAuthorisedHandler,
+    (req , res) => {
+        res.render('create-room.ejs');
 })
+router.post('/create-room', 
+    verifyJwt,
+    createTeamHandler
+)
 export {
     router
 }

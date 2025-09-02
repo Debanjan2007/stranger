@@ -1,6 +1,5 @@
 import { asyncHandler } from '../utils/asynchandler.js'
 import { User } from '../model/user.model.js'
-import jwt from 'jsonwebtoken'
 
 // register a user
 const registerUser = asyncHandler(async (req , res) => {
@@ -16,8 +15,13 @@ const registerUser = asyncHandler(async (req , res) => {
 
         user.refreshToken = refreshToken;
         await user.save();
-        
-        return res.json({ success: true, render: "/homepage" , session: accessToken });
+        res.cookie('session' , accessToken , {
+            httpOnly: false,
+            secure: false, // not using https
+            sameSite: "strict",
+            maxAge: 24 * 60 * 60 * 1000 // max time 1 day
+        })
+        return res.json({ success: true, render: "/homepage" });
     } catch (error) {
         if(error){
         console.error("error:", error);

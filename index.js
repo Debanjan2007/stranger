@@ -8,7 +8,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import jwt from 'jsonwebtoken';
+import { unAuthorisedHandler } from './middleware/unauthorisedHandler.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -18,24 +18,20 @@ const port = 3000;
 // parsing the middlewares 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'));
 app.use('/api/client', router);
-app.use(cookieParser());
+
 
 
 app.get('/', (req, res) => {   
     res.render('index.ejs', { error: req.query.error });
 })
-app.get('/homepage', (req, res) => {
-    const session = req.query.session;
-    const sessionChecked = jwt.verify(session , process.env.JWT_REFRESH_SECRET);  
-    if(session && sessionChecked){
-        res.render('homepage.ejs' , {session: session});
-    }
-    else{
-        res.redirect('/?error=unauthorized');
-    }
+app.get('/homepage',
+    unAuthorisedHandler,
+    (req, res) => {
+    res.render('homepage.ejs' );
 })
 connectDB()
     .then(() => {
