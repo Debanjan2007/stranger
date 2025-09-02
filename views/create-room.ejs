@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Room | Chat App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+</head>
+
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+
+    <!-- Navbar -->
+    <header class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">Chat App</h1>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex gap-6 items-center">
+                <a href="index.html" class="hover:text-blue-600 dark:hover:text-blue-400">Home</a>
+                <a href="#" class="hover:text-blue-600 dark:hover:text-blue-400">Features</a>
+                <a href="#" class="hover:text-blue-600 dark:hover:text-blue-400">About</a>
+                <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">🌙</button>
+            </nav>
+
+            <!-- Mobile Right Side -->
+            <div class="flex items-center gap-2 md:hidden">
+                <button id="theme-toggle-mobile" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">🌙</button>
+                <button id="menu-btn" class="p-2 rounded bg-gray-200 dark:bg-gray-700">
+                    <svg id="menu-icon" class="h-6 w-6 text-gray-800 dark:text-white" fill="none" stroke="currentColor"
+                        stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Dropdown -->
+        <div id="menu-dropdown"
+            class="hidden flex-col gap-4 px-4 py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:hidden">
+            <a href="index.html" class="block hover:text-blue-600 dark:hover:text-blue-400">Home</a>
+            <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">Features</a>
+            <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">About</a>
+        </div>
+    </header>
+
+    <!-- Create Room Section -->
+    <section class="max-w-lg mx-auto px-6 py-16 text-center">
+        <h2 class="text-3xl font-bold mb-6">🚀 Create a New Room</h2>
+        <form class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700">
+            <label for="room-name" class="block text-left mb-2 font-medium">Room Name</label>
+            <input id="room-name" type="text" placeholder="Enter room name..."
+                class="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+
+            <button type="submit"
+                class="mt-6 w-full px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg shadow hover:bg-blue-700 dark:hover:bg-blue-600 transition">
+                ✅ Create Room
+            </button>
+        </form>
+    </section>
+
+    <script>
+        // Theme persistence
+        if (localStorage.getItem("theme") === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+
+        const toggleTheme = () => {
+            const isDark = document.documentElement.classList.toggle("dark");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+        };
+
+        document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
+        document.getElementById("theme-toggle-mobile").addEventListener("click", toggleTheme);
+
+        // Mobile menu toggle
+        document.getElementById("menu-btn").addEventListener("click", () => {
+            document.getElementById("menu-dropdown").classList.toggle("hidden");
+        });
+    </script>
+</body>
+
+</html>

@@ -19,6 +19,15 @@ router.post('/login',
     uploader.none(),
     logInUser
 )
+router.get('/create-room' , (req , res) => {
+    console.log(req.cookies);
+    const session = req.session;
+    console.log(session);
+    if (!session) {
+        return res.redirect("http://localhost:3000/?error=unauthorized");
+    }
+    res.render('create-room.ejs');
+})
 export {
     router
 }

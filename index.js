@@ -29,8 +29,7 @@ app.get('/', (req, res) => {
 })
 app.get('/homepage', (req, res) => {
     const session = req.query.session;
-    console.log(typeof session);
-    const sessionChecked = jwt.verify(session , process.env.JWT_REFRESH_SECRET);
+    const sessionChecked = jwt.verify(session , process.env.JWT_REFRESH_SECRET);  
     if(session && sessionChecked){
         res.render('homepage.ejs' , {session: session});
     }

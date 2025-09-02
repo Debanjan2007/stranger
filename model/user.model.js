@@ -55,7 +55,7 @@ userSchema.methods.genRefreshToken = async function(_id) {
 
         {
             algorithm: "HS256",
-            expiresIn: process.env.JWT_EXPIRES_IN
+            expiresIn: process.env.JWT_REFRESH_EXPIRES_IN
         }
     )
 }

@@ -1,4 +1,4 @@
-import { User } from '../model/user.db.js'
+import { User } from '../model/user.model.js'
 import { asyncHandler } from '../utils//asynchandler.js'
 
 // Log in a user 

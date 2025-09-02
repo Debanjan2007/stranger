@@ -1,5 +1,5 @@
 import { asyncHandler } from '../utils/asynchandler.js'
-import { User } from '../model/user.db.js'
+import { User } from '../model/user.model.js'
 import jwt from 'jsonwebtoken'
 
 // register a user
