@@ -5,6 +5,8 @@ import { logInUser } from "../controller/logInUser.js"
 import { unAuthorisedHandler } from '../middleware/unauthorisedHandler.js'
 import { verifyJwt } from '../middleware/jwt.Verify.js'
 import { createTeamHandler }  from '../controller/createteam.js'
+import { TeamAlreadyExist } from "../middleware/teamsUniqeCheck.js"
+import { fetchuser } from '../controller/fetchUserRooms.js'
 
 const router = express.Router() ;
 
@@ -23,14 +25,21 @@ router.post('/login',
     uploader.none(),
     logInUser
 )
-router.get('/create-room' , 
-    unAuthorisedHandler,
+router.get('/create-room' ,
+    unAuthorisedHandler ,
     (req , res) => {
-        res.render('create-room.ejs');
-})
+        return res.render('create-room.ejs')
+    }
+)
 router.post('/create-room', 
+    uploader.none(),
     verifyJwt,
+    TeamAlreadyExist,
     createTeamHandler
+)
+router.get('/user/chats' , 
+    verifyJwt,
+    fetchuser
 )
 export {
     router

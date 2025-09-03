@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 export const verifyJwt = (req , res , next) => {
     try {
-        const { session } = req.cookies;
+        const session  = req.cookies.session || req.authorization ;
         const payload = jwt.verify(session , process.env.JWT_REFRESH_SECRET);
         if(!payload){
             return res.redirect('/?error=unauthorized')

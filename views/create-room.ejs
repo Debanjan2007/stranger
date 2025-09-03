@@ -20,7 +20,7 @@
 
             <!-- Desktop Nav -->
             <nav class="hidden md:flex gap-6 items-center">
-                <a href="index.html" class="hover:text-blue-600 dark:hover:text-blue-400">Home</a>
+                <a href="http://localhost:3000/homepage" class="hover:text-blue-600 dark:hover:text-blue-400">Home</a>
                 <a href="#" class="hover:text-blue-600 dark:hover:text-blue-400">Features</a>
                 <a href="#" class="hover:text-blue-600 dark:hover:text-blue-400">About</a>
                 <button id="theme-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">🌙</button>
@@ -41,7 +41,7 @@
         <!-- Mobile Dropdown -->
         <div id="menu-dropdown"
             class="hidden flex-col gap-4 px-4 py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:hidden">
-            <a href="index.html" class="block hover:text-blue-600 dark:hover:text-blue-400">Home</a>
+            <a href="http://localhost:3000/homepage" class="block hover:text-blue-600 dark:hover:text-blue-400">Home</a>
             <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">Features</a>
             <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">About</a>
         </div>
@@ -83,18 +83,27 @@
         });
 
         async function createRoom() {
-            const teamName = document.getElementById("room-name").value ;
+            document.querySelector('form').addEventListener('submit', (e) => {
+                e.preventDefault() ;
+            }) ;
+            let teamName = document.getElementById("room-name") ;
+            const teamNameVal = teamName.value
             const res = await fetch('http://localhost:3000/api/client/create-room' , {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ teamName })
+                body: JSON.stringify({ teamName : teamNameVal })
             })
             const data = await res.json() ;
-            console.log(data);            
+            alert(data.message) ;
+            if(!data.success){               
+                teamName.value = ''
+                teamName.focus()
+            }
+            console.log(data);
+            await fetch("http://localhost:3000/api/client/user/chats")
         }
     </script>
 </body>
-
 </html>

@@ -9,7 +9,8 @@ const teamSchema = new mongoose.Schema({
     },
     teamName: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     members: [
         {
@@ -26,6 +27,9 @@ const teamSchema = new mongoose.Schema({
     session: {
         type: String,
     }
+},
+{
+    timestamps: true
 })
 
 export const Team = mongoose.model('Team' , teamSchema)
