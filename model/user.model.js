@@ -22,8 +22,14 @@ const userSchema = mongoose.Schema({
     },
     teams:[
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Team'
+            UID: {
+                type: String
+            },
+            role: {
+                type: String,
+                enum: ['admin' , 'member']
+            },
+            _id: false
         }
     ]
 }, { timestamps: true })

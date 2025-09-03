@@ -17,6 +17,12 @@ const teamSchema = new mongoose.Schema({
             ref: 'User'
         }
     ],
+    admins: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ],
     session: {
         type: String,
     }

@@ -7,20 +7,22 @@ export const createTeamHandler = asyncHandler(async (req, res) => {
     const userID = req.user.id;
     const team = await Team.create({
         teamName: teamName,
-        members: [userID]
+        members: [userID],
+        admins: [userID]
     })
     if (!team) {
         return res.json({ success: false, message: "Team creation failed" });
     }
+    
     await User.findByIdAndUpdate(userID,
         {
-            $addToSet:
-                { teams: team.UID }
+            $addToSet:{
+                teams: { UID: team.UID, role: 'admin' }
+            }
         },
         {
             new: true
         }
     )
-    console.log(team);
     return res.json({ success: true, team });
 })
