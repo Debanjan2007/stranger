@@ -49,9 +49,9 @@ connectDB()
                 const filePath = path.join(__dirname, `./Teams/${userName}.json`)
                 console.log(filePath);                
                 const data = fs.createReadStream(filePath, 'utf-8')
-
                 data.on("data", (chunk) => {
-                    socket.emit("user-teams-chunk", chunk)
+                    console.log(JSON.parse(chunk));                    
+                    socket.emit("user-teams-chunk", JSON.parse(chunk))
                 })
                 data.on("end", () => {
                     socket.emit("user-teams-end");

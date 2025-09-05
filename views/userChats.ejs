@@ -55,20 +55,19 @@
         <!-- Mobile Dropdown -->
         <div id="menu-dropdown"
             class="hidden flex-col space-y-4 px-4 py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:hidden">
-
             <!-- Search -->
             <div class="relative">
                 <input type="text" placeholder="Search teams..."
                     class="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400" />
                 <span class="absolute right-3 top-2.5">🔍</span>
             </div>
-
             <!-- Create -->
-            <button
+            <a href="http://localhost:3000/api/client/create-room">
+                <button
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 dark:hover:bg-blue-500 transition w-full">
                 + Create
             </button>
-
+            </a>
             <!-- Links -->
             <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">Home</a>
             <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">Features</a>
@@ -98,21 +97,7 @@
                     class="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
             </div>
             <!-- Chats -->
-            <ul>
-                <li class="p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                    onclick="openChat('Phoenix Devs')">
-                    <h3 class="font-semibold">Phoenix Devs</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Last message preview…</p>
-                </li>
-                <li class="p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                    onclick="openChat('Bloomware')">
-                    <h3 class="font-semibold">Bloomware</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Last message preview…</p>
-                </li>
-                <li class="p-4 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onclick="openChat('Hive')">
-                    <h3 class="font-semibold">Hive</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Last message preview…</p>
-                </li>
+            <ul id="team-list">
             </ul>
         </aside>
 
@@ -178,18 +163,40 @@
         });
     </script>
     <script src="/socket.io/socket.io.js"></script>
-        <script>
+    <script>
         const socket = io()
-        const userName = "<%= JSON.stringify(userName) %>"
-        socket.emit("stream-user-teams", userName);
-
-        socket.on("user-teams-chunk", (chunk) => {
-            console.log(chunk);            
+        //  fetching the team data from server in streams so used the socket connection for continuous data
+        socket.on('connect', () => {
+            document.getElementById("team-list").innerHTML = "";
+            console.log("user connected o server ", socket.id);
+            const userName = "<%= userName %>"
+            console.log(userName);
+            socket.emit("stream-user-teams", userName);
+        })
+        socket.on("user-teams-chunk", (teams) => {
+            teams.forEach(team => {
+                appendTeam(team)
+            });
         });
-
         socket.on("user-teams-end", () => {
             console.log("data fetch complete");
         });
+        socket.on('disconnect', () => {
+            console.log("User disconnected");
+        })
+        function appendTeam(team) {
+            const ul = document.getElementById("team-list");
+            const li = document.createElement("li");
+            li.className =
+                "p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
+            li.innerHTML = `
+    <h3 class="font-semibold">${team.teamName}</h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+    ${team.members?.length || 0} members
+    </p>`;
+            li.addEventListener("click", () => openChat(team.teamName));
+            ul.appendChild(li);
+        }
     </script>
 </body>
 
