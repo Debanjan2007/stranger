@@ -6,7 +6,7 @@ import { unAuthorisedHandler } from '../middleware/unauthorisedHandler.js'
 import { verifyJwt } from '../middleware/jwt.Verify.js'
 import { createTeamHandler }  from '../controller/createteam.js'
 import { TeamAlreadyExist } from "../middleware/teamsUniqeCheck.js"
-import { fetchuser } from '../controller/fetchUserRooms.js'
+import { fetchuser } from '../middleware/fetchUserRooms.js'
 
 const router = express.Router() ;
 
@@ -39,7 +39,10 @@ router.post('/create-room',
 )
 router.get('/user/chats' , 
     verifyJwt,
-    fetchuser
+    fetchuser,
+    (req, res) => {
+        res.render("userChats.ejs" ,{userName  : req.userName})
+    }
 )
 export {
     router

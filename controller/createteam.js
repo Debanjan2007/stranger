@@ -6,10 +6,12 @@ export const createTeamHandler = asyncHandler(async (req, res) => {
     try {
         const teamName = req.team;
         const userID = req.user.id;
+        const currentTime = Date.now()
         const team = await Team.create({
             teamName: teamName,
             members: [userID],
-            admins: [userID]
+            admins: [userID],
+            lastOpen: currentTime
         })
         if (!team) {
             return res.json({ success: false, message: "Team creation failed" });

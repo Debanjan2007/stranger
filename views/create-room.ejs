@@ -100,9 +100,10 @@
             if(!data.success){               
                 teamName.value = ''
                 teamName.focus()
+                return ;
             }
             console.log(data);
-            await fetch("http://localhost:3000/api/client/user/chats")
+            window.location.href = "http://localhost:3000/api/client/user/chats"
         }
     </script>
 </body>

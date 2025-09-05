@@ -24,6 +24,9 @@ const teamSchema = new mongoose.Schema({
             ref: 'User'
         }
     ],
+    lastOpen: {
+        type: Date
+    },
     session: {
         type: String,
     }

@@ -8,13 +8,10 @@ import { dirname } from 'node:path';
 import path from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dirName = path.join(__dirname , "Teams")
+const dirName = path.join(__dirname, "../Teams")
 
-
-export const fetchuser = asyncHandler(async (req , res) => {
+export const fetchuser = asyncHandler(async (req, res, next) => {
     try {
-        console.log(__dirname);
-        
         const userPayload = req.user
         const user = await User.aggregate([
             {
@@ -24,18 +21,17 @@ export const fetchuser = asyncHandler(async (req , res) => {
             },
             {
                 $project: {
-                    "teams" : 1,
+                    "teams": 1,
                     "userName": 1
                 }
             }
         ])
-        if(!user){
+        if (!user) {
             console.error("error:", error);
             return res.redirect('/?error="internal"')
         }
-        console.log(user[0].teams);
-        const teamDetails = [] ;
-        for(let elm of user[0].teams){
+        const TeamArr = []
+        for (let elm of user[0].teams) {
             const team = await Team.aggregate([
                 {
                     $match: {
@@ -45,18 +41,22 @@ export const fetchuser = asyncHandler(async (req , res) => {
                 {
                     $project: {
                         "teamName": 1,
-                        "members" : 1,
+                        "members": 1,
                         "admins": 1
                     }
                 }
             ])
-        console.log(team);
-        teamDetails.push(team)
+            if (team.length > 0) {
+                TeamArr.push(team[0]);
+            }
         }
-        console.log(teamDetails);
-        
+        fs.writeFileSync(path.join(dirName, `${userPayload.userName}.json`), JSON.stringify(TeamArr, null, 2), 'utf-8', (error) => {
+            if (error) return console.log(error);
+        })
+        req.userName = userPayload.userName
+        next()
     } catch (error) {
         console.error("error:", error);
-        return res.json({ success: false, message: "Registration failed" , redirect: "/register" }); 
+        return res.json({ success: false, message: "Registration failed", redirect: "/register" });
     }
 })

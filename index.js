@@ -5,6 +5,7 @@ import { router } from './routes/index.routes.js'
 import { Server } from 'socket.io'
 import { connectDB } from "./db/db.connect.js";
 import cookieParser from 'cookie-parser';
+import fs from "fs"
 import path from 'path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,15 +25,14 @@ app.set('views', path.join(__dirname, 'views'));
 app.use('/api/client', router);
 
 
-
-app.get('/', (req, res) => {   
+app.get('/', (req, res) => {
     res.render('index.ejs', { error: req.query.error });
 })
 app.get('/homepage',
     unAuthorisedHandler,
     (req, res) => {
-    res.render('homepage.ejs' );
-})
+        res.render('homepage.ejs');
+    })
 connectDB()
     .then(() => {
         // here the http was needed because in case of websockets the first req is a http handshake req 
@@ -45,8 +45,21 @@ connectDB()
 
         io.on('connection', (socket) => {
             console.log('a user connected');
-            socket.on('chat message', (msg) => {
-                io.emit('incoming message', msg); // broadcast the message to all connected clients
+            socket.on('stream-user-teams', (userName) => {
+                const filePath = path.join(__dirname, `./Teams/${userName}.json`)
+                console.log(filePath);                
+                const data = fs.createReadStream(filePath, 'utf-8')
+
+                data.on("data", (chunk) => {
+                    socket.emit("user-teams-chunk", chunk)
+                })
+                data.on("end", () => {
+                    socket.emit("user-teams-end");
+                })
+                data.on('error', (err) => {
+                    console.error(err);
+                    socket.emit("user-teams-error", { message: "Failed to stream user teams" });
+                })
             })
             socket.on('disconnect', () => {
                 console.log('user disconnected');
@@ -57,9 +70,9 @@ connectDB()
             console.log(`Server is running on http://localhost:${port}`);
         })
     })
-.catch((err) => {
-    if(err){
-        console.log(`Database connection failed: ${err.message}`);
-        process.exit(1);
-    }
-})
+    .catch((err) => {
+        if (err) {
+            console.log(`Database connection failed: ${err.message}`);
+            process.exit(1);
+        }
+    })

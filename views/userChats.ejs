@@ -177,6 +177,20 @@
             document.getElementById("chat-list").classList.remove("hidden");
         });
     </script>
+    <script src="/socket.io/socket.io.js"></script>
+        <script>
+        const socket = io()
+        const userName = "<%= JSON.stringify(userName) %>"
+        socket.emit("stream-user-teams", userName);
+
+        socket.on("user-teams-chunk", (chunk) => {
+            console.log(chunk);            
+        });
+
+        socket.on("user-teams-end", () => {
+            console.log("data fetch complete");
+        });
+    </script>
 </body>
 
 </html>

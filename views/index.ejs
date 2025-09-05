@@ -118,7 +118,7 @@
                         });
                         const data  = await res.json();
                         if(data){
-                            window.location.href = `http://localhost:3000/homepage`
+                            window.location.href = "http://localhost:3000/api/client/user/chats"
                         }else{
                             window.location.href = `http://localhost:3000/?error=${data.error}`
                         }
