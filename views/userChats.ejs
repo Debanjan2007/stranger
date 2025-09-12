@@ -105,8 +105,9 @@
             <!-- Chat Header -->
             <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center gap-2">
-                    <button id="back-btn" class="p-2 rounded bg-gray-200 dark:bg-gray-700">⬅</button>
-                    <h2 id="chat-title" class="font-bold text-lg">Select a team</h2>
+                    <button id="back-btn" class="p-2 rounded bg-gray-200 dark:bg-gray-700">
+                        < </button>
+                            <h2 id="chat-title" class="font-bold text-lg">Select a team</h2>
                 </div>
                 <div></div>
             </div>
@@ -119,9 +120,9 @@
             <!-- Input Bar (BOTTOM, fixed in layout) -->
             <div
                 class="p-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2 bg-white dark:bg-gray-800">
-                <input type="text" placeholder="Type a message..."
+                <input type="text" placeholder="Type a message..." id="msgInputbtn"
                     class="flex-1 px-3 py-2 rounded-lg bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                <button
+                <button id="sendbtn"
                     class="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600">
                     ➤
                 </button>
@@ -146,10 +147,6 @@
         // Open Chat
         function openChat(teamName) {
             document.getElementById("chat-title").innerText = teamName;
-            document.getElementById("messages").innerHTML = `
-        <div class="self-start bg-gray-200 dark:bg-gray-700 p-2 rounded-lg max-w-xs">Hello from ${teamName}!</div>
-        <div class="self-end bg-blue-600 text-white p-2 rounded-lg max-w-xs">Hey 👋</div>`;
-            // Mobile: hide chat list, show chat
             document.getElementById("chat-list").classList.add("hidden");
             document.getElementById("chat-area").classList.remove("hidden");
         }
@@ -159,26 +156,55 @@
             document.getElementById("chat-area").classList.add("hidden");
             document.getElementById("chat-list").classList.remove("hidden");
         });
+
+        // ✅ Helper: Append outgoing (right) message
+        function appendOutgoingMessage(text) {
+            const messages = document.getElementById("messages");
+            const msg = document.createElement("div");
+            msg.className = "self-end bg-blue-600 text-white p-2 rounded-lg max-w-xs";
+            msg.textContent = text;
+            messages.appendChild(msg);
+            messages.scrollTop = messages.scrollHeight; // auto scroll
+        }
+        function appendIncomingMessage(text) {
+            const messages = document.getElementById("messages");
+            const msg = document.createElement("div");
+            msg.className = "self-start bg-gray-200 dark:bg-gray-700 p-2 rounded-lg max-w-xs";
+            msg.textContent = text;
+            messages.appendChild(msg);
+            messages.scrollTop = messages.scrollHeight; // auto scroll
+        }
     </script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const token = document.cookie.split("=")[1]
         const socket = io()
         //  fetching the team data from server in streams so used the socket connection for continuous data
-        showLoadingTeams()
+
+        showLoadingTeams();
         socket.on('connect', () => {
             console.log("Connected with server server id is", socket.id);
             const userName = "<%= userName %>"
             socket.emit('fetch-userData', userName)
-            socket.on('user-dataFetched', (teamArr) => {
-                const ul = document.getElementById("team-list");
-                ul.innerHTML = "" 
-                teamArr = [...JSON.parse(teamArr)]
-                console.log(typeof teamArr);
-                teamArr.forEach(team => {
-                    console.log(team);
-                    appendTeam(team)
-                });
+        })
+        socket.on('user-dataFetched', (teamArr) => {
+            teamArr = [...JSON.parse(teamArr)]
+            if (!teamArr.length) {
+                console.log("No real data got so keeping the same as before");
+                return;
+            }
+            const ul = document.getElementById("team-list");
+            ul.innerHTML = ""
+            console.log(typeof teamArr);
+            teamArr.forEach(team => {
+                appendTeam(team)
+            });
+            setTimeout(socket.emit('Fetch-complete'), 1000)
+            socket.on('newUser', (socketID) => {
+                console.log("New user Connected to the Room ", socketID);
+            })
+            socket.on('gotMsg', (msg) => {
+                appendIncomingMessage(msg)
             })
         })
         function showLoadingTeams(count = 5) {
@@ -210,16 +236,27 @@
             li.className =
                 "p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
             li.innerHTML = `
-        <h3 class="font-semibold">${team.teamName}</h3>
+        <h3 class="font-semibold roomName">${team.teamName}</h3>
         <p class="text-sm text-gray-500 dark:text-gray-400">
             ${team.members?.length || 0} members
         </p>
     `;
-            li.addEventListener("click", () => openChat(team.teamName));
+            li.addEventListener("click", () => {
+                const Room = document.querySelector('.roomName').innerText
+                socket.emit('joinRoom', Room, socket.id);
+                openChat(team.teamName)
+            }
+            );
             ul.appendChild(li);
         }
 
-
+        document.getElementById('sendbtn').addEventListener('click', () => {
+            const msg = document.getElementById('msgInputbtn')
+            const roomTitle = document.getElementById('chat-title').innerText
+            appendOutgoingMessage(msg.value.trim())
+            socket.emit('send-msg', msg, roomTitle)
+            msg.value = ""
+        })
     </script>
 </body>
 

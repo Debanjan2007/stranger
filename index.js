@@ -48,16 +48,36 @@ connectDB()
             socket.on('fetch-userData', (userName) => {
                 console.log("username is : ", userName);
                 const dirpath = path.join(__dirname, '/Teams');
-                const dataFetched = fs.readFileSync(`${dirpath}/${userName}.json`, 'utf-8', (err) => {
+                const filepath = path.join(dirpath, `${userName}.json`)
+                if (!fs.existsSync(filepath)) {
+                    console.log("No team file found for", userName);
+                    socket.emit('user-dataFetched', JSON.stringify([]));
+                    return;
+                }
+                const dataFetched = fs.readFileSync(filepath, 'utf-8', (err) => {
                     if (err) {
                         console.log(err);
                         return;
                     }
                 })
-                console.log([...JSON.parse(dataFetched)]);                
-                if(dataFetched){
-                    socket.emit('user-dataFetched' , dataFetched)
+                if (dataFetched) {
+                    socket.emit('user-dataFetched', dataFetched)
                 }
+                socket.on('Fetch-complete', async () => {
+                    await fs.unlink(`${dirpath}/${userName}.json`, (err) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                    })
+                })
+            })
+            socket.on('send-msg' , (msg , roomName) => {
+                io.except(roomName).emit('gotMsg' , msg)
+            })
+            socket.on('joinRoom' , (roomName , socketID) => {
+                console.log("Joining the team named",roomName);                
+                socket.join(roomName)
+                io.except(roomName).emit('newUser' , socketID)
             })
             socket.on('disconnect', () => {
                 console.log('user disconnected');
