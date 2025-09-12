@@ -5,11 +5,11 @@ import { router } from './routes/index.routes.js'
 import { Server } from 'socket.io'
 import { connectDB } from "./db/db.connect.js";
 import cookieParser from 'cookie-parser';
-import fs from "fs"
 import path from 'path';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { unAuthorisedHandler } from './middleware/unauthorisedHandler.js'
+import fs from 'fs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -44,22 +44,20 @@ connectDB()
         const io = new Server(server);
 
         io.on('connection', (socket) => {
-            console.log('a user connected');
-            socket.on('stream-user-teams', (userName) => {
-                const filePath = path.join(__dirname, `./Teams/${userName}.json`)
-                console.log(filePath);                
-                const data = fs.createReadStream(filePath, 'utf-8')
-                data.on("data", (chunk) => {
-                    console.log(JSON.parse(chunk));                    
-                    socket.emit("user-teams-chunk", JSON.parse(chunk))
+            let teamArr = []
+            socket.on('fetch-userData', (userName) => {
+                console.log("username is : ", userName);
+                const dirpath = path.join(__dirname, '/Teams');
+                const dataFetched = fs.readFileSync(`${dirpath}/${userName}.json`, 'utf-8', (err) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
                 })
-                data.on("end", () => {
-                    socket.emit("user-teams-end");
-                })
-                data.on('error', (err) => {
-                    console.error(err);
-                    socket.emit("user-teams-error", { message: "Failed to stream user teams" });
-                })
+                console.log([...JSON.parse(dataFetched)]);                
+                if(dataFetched){
+                    socket.emit('user-dataFetched' , dataFetched)
+                }
             })
             socket.on('disconnect', () => {
                 console.log('user disconnected');

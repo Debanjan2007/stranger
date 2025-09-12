@@ -41,7 +41,9 @@ router.get('/user/chats' ,
     verifyJwt,
     fetchuser,
     (req, res) => {
-        res.render("userChats.ejs" ,{userName  : req.userName})
+        const { userName } = req.user 
+        console.log(userName);        
+        res.render("userChats.ejs" ,{userName  : userName})
     }
 )
 export {

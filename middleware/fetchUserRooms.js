@@ -10,13 +10,14 @@ import path from "node:path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const dirName = path.join(__dirname, "../Teams")
 
-export const fetchuser = asyncHandler(async (req, res, next) => {
-    try {
-        const userPayload = req.user
+export const fetchuser = asyncHandler(async (req , res , next) => {
+    try {        
+        const { userName } = req.user
+        const filepath = path.join(dirName, `${userName}.json`)
         const user = await User.aggregate([
             {
                 $match: {
-                    _id: new mongoose.Types.ObjectId(`${userPayload.id}`)
+                    userName: userName,
                 }
             },
             {
@@ -26,10 +27,6 @@ export const fetchuser = asyncHandler(async (req, res, next) => {
                 }
             }
         ])
-        if (!user) {
-            console.error("error:", error);
-            return res.redirect('/?error="internal"')
-        }
         const TeamArr = []
         for (let elm of user[0].teams) {
             const team = await Team.aggregate([
@@ -50,13 +47,12 @@ export const fetchuser = asyncHandler(async (req, res, next) => {
                 TeamArr.push(team[0]);
             }
         }
-        fs.writeFileSync(path.join(dirName, `${userPayload.userName}.json`), JSON.stringify(TeamArr, null, 2), 'utf-8', (error) => {
+        fs.writeFileSync(filepath , JSON.stringify(TeamArr, null, 2), 'utf-8', (error) => {
             if (error) return console.log(error);
         })
-        req.userName = userPayload.userName
-        next()
+        next() 
     } catch (error) {
         console.error("error:", error);
-        return res.json({ success: false, message: "Registration failed", redirect: "/register" });
+        return ;
     }
 })

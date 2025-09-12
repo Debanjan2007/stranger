@@ -30,10 +30,10 @@
                 </div>
 
                 <!-- Create -->
-                <button
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 dark:hover:bg-blue-500 transition">
-                    + Create
-                </button>
+                <a href="http://localhost:3000/api/client/create-room"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 dark:hover:bg-blue-500 transition w-full">
+                    🚀 Create room
+                </a>
 
                 <!-- Theme toggle -->
                 <button id="theme-toggle"
@@ -62,11 +62,9 @@
                 <span class="absolute right-3 top-2.5">🔍</span>
             </div>
             <!-- Create -->
-            <a href="http://localhost:3000/api/client/create-room">
-                <button
+            <a href="http://localhost:3000/api/client/create-room"
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 dark:hover:bg-blue-500 transition w-full">
-                + Create
-            </button>
+                🚀 Create room
             </a>
             <!-- Links -->
             <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">Home</a>
@@ -164,39 +162,64 @@
     </script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        const token = document.cookie.split("=")[1]
         const socket = io()
         //  fetching the team data from server in streams so used the socket connection for continuous data
+        showLoadingTeams()
         socket.on('connect', () => {
-            document.getElementById("team-list").innerHTML = "";
-            console.log("user connected o server ", socket.id);
+            console.log("Connected with server server id is", socket.id);
             const userName = "<%= userName %>"
-            console.log(userName);
-            socket.emit("stream-user-teams", userName);
+            socket.emit('fetch-userData', userName)
+            socket.on('user-dataFetched', (teamArr) => {
+                const ul = document.getElementById("team-list");
+                ul.innerHTML = "" 
+                teamArr = [...JSON.parse(teamArr)]
+                console.log(typeof teamArr);
+                teamArr.forEach(team => {
+                    console.log(team);
+                    appendTeam(team)
+                });
+            })
         })
-        socket.on("user-teams-chunk", (teams) => {
-            teams.forEach(team => {
-                appendTeam(team)
-            });
-        });
-        socket.on("user-teams-end", () => {
-            console.log("data fetch complete");
-        });
-        socket.on('disconnect', () => {
-            console.log("User disconnected");
-        })
+        function showLoadingTeams(count = 5) {
+            const ul = document.getElementById("team-list");
+            ul.innerHTML = ""; // Clear old stuff
+
+            for (let i = 0; i < count; i++) {
+                const li = document.createElement("li");
+                li.className =
+                    "p-4 border-b border-gray-200 dark:border-gray-700 animate-pulse";
+
+                li.innerHTML = `
+                <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/2 mb-2"></div>
+                <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+            `;
+                ul.appendChild(li);
+            }
+        }
+
         function appendTeam(team) {
             const ul = document.getElementById("team-list");
+
+            // always clear out loading skeletons before appending first real team
+            if (ul.innerHTML.includes("animate-pulse")) {
+                ul.innerHTML = "";
+            }
+
             const li = document.createElement("li");
             li.className =
                 "p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
             li.innerHTML = `
-    <h3 class="font-semibold">${team.teamName}</h3>
-    <p class="text-sm text-gray-500 dark:text-gray-400">
-    ${team.members?.length || 0} members
-    </p>`;
+        <h3 class="font-semibold">${team.teamName}</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+            ${team.members?.length || 0} members
+        </p>
+    `;
             li.addEventListener("click", () => openChat(team.teamName));
             ul.appendChild(li);
         }
+
+
     </script>
 </body>
 
