@@ -10,6 +10,8 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { unAuthorisedHandler } from './middleware/unauthorisedHandler.js'
 import fs from 'fs';
+import { Team } from './model/teams.model.js';
+import { joinUser } from './utils/joinUser.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -71,13 +73,36 @@ connectDB()
                     })
                 })
             })
-            socket.on('send-msg' , (msg , roomName) => {
-                io.except(roomName).emit('gotMsg' , msg)
+            socket.on('search-teams', async (query) => {
+                console.log("user searching with query ",query);
+                
+                const teams = await Team.aggregate([
+                    {
+                        $match: {
+                            teamName: { $regex: query, $options: "i" }
+                        }
+                    },
+                    {
+                        $limit: 5
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            teamName: 1
+                        }
+                    }
+                ]);
+                console.log('search-results' , teams);                
+                socket.emit('search-results' , teams)
             })
-            socket.on('joinRoom' , (roomName , socketID) => {
-                console.log("Joining the team named",roomName);                
+            socket.on('send-msg', (msg, roomName) => {
+                io.to(roomName).emit('gotMsg', msg)
+            })
+            socket.on('joinRoom', (roomName, socketID , token) => {
+                console.log("Joining the team named", roomName);
                 socket.join(roomName)
-                io.except(roomName).emit('newUser' , socketID)
+                joinUser(roomName , token)
+                io.to(roomName).emit('newUser', socketID)
             })
             socket.on('disconnect', () => {
                 console.log('user disconnected');
