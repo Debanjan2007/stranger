@@ -124,7 +124,6 @@
 
             <!-- Messages (scrollable) -->
             <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3">
-                <p class="text-gray-400 text-center">No chat selected</p>
             </div>
 
             <!-- Input Bar (BOTTOM, fixed in layout) -->
@@ -154,11 +153,16 @@
         };
         document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
 
+        let currentTeam = null
         // Open Chat
-        function openChat(teamName) {
+        function openChat(teamName , token , socket) {
+            currentTeam = teamName
             document.getElementById("chat-title").innerText = teamName;
             document.getElementById("chat-list").classList.add("hidden");
             document.getElementById("chat-area").classList.remove("hidden");
+            document.getElementById("messages").innerHTML = "";
+            socket.emit('joinRoom' , teamName , socket , token);
+            return
         }
 
         // Back button for mobile
@@ -185,7 +189,7 @@
             messages.scrollTop = messages.scrollHeight; // auto scroll
         }
     </script>
-    <script> // for searching
+    <script> // for searching teams in the sidebar locally
         const searchInput = document.getElementById("searchTeamClientSide");
 
         searchInput.addEventListener("input", () => {
@@ -205,7 +209,14 @@
                     }, 2000);
                 }
             });
+            // Example helper for system messages
         });
+        function appendSystemMessage(msg) {
+                const messages = document.getElementById("messages");
+                const div = document.createElement("div");
+                div.innerHTML = `<p class="text-center text-gray-100 italic z-99">${msg}</p>`
+                messages.appendChild(div);
+            }
     </script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -219,6 +230,7 @@
             const userName = "<%= userName %>"
             socket.emit('fetch-userData', userName)
         })
+        //  data fetch from server
         socket.on('user-dataFetched', (teamArr) => {
             teamArr = [...JSON.parse(teamArr)]
             if (!teamArr.length) {
@@ -227,21 +239,46 @@
             }
             const ul = document.getElementById("team-list");
             ul.innerHTML = ""
-            console.log(typeof teamArr);
             teamArr.forEach(team => {
+                console.log(`team is ${team}`);
+                if (!team) {
+                    const ul = document.getElementById("team-list");
+
+                    // always clear out loading skeletons before appending first real team
+                    if (ul.innerHTML.includes("animate-pulse")) {
+                        ul.innerHTML = "";
+                    }
+                    const li = document.createElement("li");
+                    li.className =
+                        "p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
+                    li.innerHTML = `
+                <h3 class="font-semibold roomName">No teams joined yet</h3>
+                `;
+                    ul.appendChild(li);
+                    return
+                }
                 appendTeam(team)
             });
             setTimeout(() => {
                 socket.emit('Fetch-complete'), 1000
             })
-            socket.on('newUser', (socketID) => {
-                console.log("New user Connected to the Room ", socketID);
-            })
-            socket.on('gotMsg', (msg) => {
-                appendIncomingMessage(msg)
-            })
         })
-        function showLoadingTeams(count = 5) {
+        socket.on('user-joined' , (userName) => {
+            console.log(`${userName} has joined the room`);
+            appendSystemMessage(`${userName} has joined the room`);
+        })
+        socket.on('gotMsg', (msg, serverToken) => {
+            if (serverToken !== token) {
+                console.log(`message comming is ${msg}`);                
+                appendIncomingMessage(msg)
+                return ;
+            }
+        })
+        socket.on('new-user-joined', (userName) => {
+            console.log("user joined event received : ", userName);            
+            appendSystemMessage(`${userName} has joined the room`)
+        })
+        function showLoadingTeams(count) {
             const ul = document.getElementById("team-list");
             ul.innerHTML = ""; // Clear old stuff
 
@@ -265,7 +302,7 @@
             if (ul.innerHTML.includes("animate-pulse")) {
                 ul.innerHTML = "";
             }
-
+            const token = document.cookie.split("=")[1]
             const li = document.createElement("li");
             li.className =
                 "p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
@@ -276,23 +313,22 @@
         </p>
     `;
             li.addEventListener("click", () => {
-                const Room = document.querySelector('.roomName').innerText
-                socket.emit('joinRoom', Room, socket.id);
-                openChat(team.teamName)
+                socket.emit('joinRoom', team.teamName, socket.id, token);
+                openChat(team.teamName , socket.id , token)
             }
             );
             ul.appendChild(li);
+            return ;
         }
-
-        document.getElementById('sendbtn').addEventListener('click', () => {
+        document.getElementById('sendbtn').addEventListener('click', (elm) => {
+            console.log(elm);            
             const msg = document.getElementById('msgInputbtn')
-            const roomTitle = document.getElementById('chat-title').innerText
             appendOutgoingMessage(msg.value.trim())
-            socket.emit('send-msg', msg.value.trim(), roomTitle)
+            socket.emit('send-msg', msg.value.trim(), currentTeam, token)
             msg.value = ""
         })
-    </script>
-    <script> // for global team search
+        
+        // for global team search
         function setupSearch(inputId, dropdownId) {
             const searchInput = document.getElementById(inputId);
             const searchDropdown = document.getElementById(dropdownId);
@@ -315,7 +351,7 @@
                 }, 300);
             });
             socket.on("search-results", (teams) => {
-                console.log('search-results' , teams);
+                console.log('search-results', teams);
                 searchDropdown.innerHTML = "";
 
                 if (!teams.length) {
@@ -330,8 +366,8 @@
                     li.textContent = team.teamName;
 
                     li.addEventListener("click", () => {
-                        socket.emit("joinRoom", team.teamName, socket.id , token);
-                        openChat(team.teamName);
+                        socket.emit("joinUser", team.teamName, socket.id, token);
+                        openChat(team.teamName , socket.id , token);
                         searchDropdown.classList.add("hidden");
                         searchDropdown.innerHTML = "";
                         searchInput.value = "";

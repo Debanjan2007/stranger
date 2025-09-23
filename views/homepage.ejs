@@ -67,19 +67,30 @@
 
 
         <!-- Search + Button -->
-        <div class="flex w-full md:w-2/3 relative">
-            <input id="searchGlobal" type="text" placeholder="Search teams..."
-                class="flex-1 px-4 py-2 rounded-l-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400" />
-            <button
-                class="px-4 bg-blue-600 dark:bg-blue-500 text-white rounded-r-full hover:bg-blue-700 dark:hover:bg-blue-600 transition">
-                🔍
-            </button>
+        <!-- Search + Button + Create Room -->
+        <div class="flex w-full md:w-2/3 relative gap-2">
+            <!-- Search Bar -->
+            <div class="flex flex-1 relative">
+                <input id="searchGlobal" type="text" placeholder="Search teams..."
+                    class="flex-1 px-4 py-2 rounded-l-full bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <button
+                    class="px-4 bg-blue-600 dark:bg-blue-500 text-white rounded-r-full hover:bg-blue-700 dark:hover:bg-blue-600 transition">
+                    🔍
+                </button>
 
-            <!-- Dropdown for search results -->
-            <ul id="searchDropdown"
-                class="absolute top-full mt-2 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hidden flex-col z-50">
-            </ul>
+                <!-- Dropdown for search results -->
+                <ul id="searchDropdown"
+                    class="absolute top-full mt-2 w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hidden flex-col z-50">
+                </ul>
+            </div>
+
+            <!-- Create Room Button -->
+            <a id="createRoomBtn" href="http://localhost:3000/api/client/create-room"
+                class="px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-full hover:bg-blue-600 dark:hover:bg-blue-600 transition">
+                🚀 Create Room
+            </a>
         </div>
+
 
     </section>
 
@@ -164,7 +175,7 @@
                     li.textContent = team.teamName;
 
                     li.addEventListener("click", () => {
-                        socket.emit("joinRoom", team.teamName, socket.id , token);
+                        socket.emit("joinRoom", team.teamName, socket.id, token);
                         window.location.href = `http://localhost:3000/api/client/user/chats`
                         searchDropdown.classList.add("hidden");
                         searchDropdown.innerHTML = "";
