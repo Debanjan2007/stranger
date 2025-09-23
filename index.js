@@ -10,6 +10,8 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { unAuthorisedHandler } from './middleware/unauthorisedHandler.js'
 import fs from 'fs';
+import { Team } from './model/teams.model.js';
+import { joinUser } from './utils/joinUser.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -41,7 +43,9 @@ connectDB()
         const server = http.createServer(app);
 
         // mount on the server i.e on the same port existance same as websocket
-        const io = new Server(server);
+        const io = new Server(server, {
+            connectionStateRecovery: {}
+        });
 
         io.on('connection', (socket) => {
             let teamArr = []
@@ -71,13 +75,45 @@ connectDB()
                     })
                 })
             })
-            socket.on('send-msg' , (msg , roomName) => {
-                io.except(roomName).emit('gotMsg' , msg)
+            socket.on('search-teams', async (query) => {
+                console.log("user searching with query ", query);
+
+                const teams = await Team.aggregate([
+                    {
+                        $match: {
+                            teamName: { $regex: query, $options: "i" }
+                        }
+                    },
+                    {
+                        $limit: 5
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            teamName: 1
+                        }
+                    }
+                ]);
+                socket.emit('search-results', teams)
             })
-            socket.on('joinRoom' , (roomName , socketID) => {
-                console.log("Joining the team named",roomName);                
+            socket.on('send-msg', (msg, roomName, token) => {
+                console.log("Message received ", " in room: ", roomName, " with token : ", token);
+                io.to(roomName).emit('gotMsg', msg, token)
+            })
+            socket.on('joinUser', (roomName, socketID, token) => {
+                joinUser(roomName, token)
                 socket.join(roomName)
-                io.except(roomName).emit('newUser' , socketID)
+                io.to(roomName).emit('new-user-joined', socketID)
+            })
+            socket.on('joinRoom', (roomName, socketID, token) => {
+                console.log("Joining room : ", roomName);
+                try {
+                    socket.join(roomName)
+                    io.to(roomName).emit('user-joined', socketID)
+                    console.log("Room joined successfully");                    
+                } catch (error) {
+                    console.log(error);
+                }
             })
             socket.on('disconnect', () => {
                 console.log('user disconnected');

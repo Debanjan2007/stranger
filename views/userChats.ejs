@@ -20,14 +20,19 @@
             <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">Chat App</h1>
 
             <!-- Desktop Nav -->
-            <!-- Desktop Nav -->
             <nav class="hidden md:flex items-center gap-4">
                 <!-- Search -->
                 <div class="relative">
-                    <input type="text" placeholder="Search teams..."
+                    <input type="text" id="searchGlobal" placeholder="Search teams..."
                         class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400" />
                     <span class="absolute right-3 top-2.5">🔍</span>
+
+                    <!-- Dropdown -->
+                    <ul id="searchDropdown"
+                        class="absolute left-0 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hidden z-50">
+                    </ul>
                 </div>
+
 
                 <!-- Create -->
                 <a href="http://localhost:3000/api/client/create-room"
@@ -57,19 +62,26 @@
             class="hidden flex-col space-y-4 px-4 py-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:hidden">
             <!-- Search -->
             <div class="relative">
-                <input type="text" placeholder="Search teams..."
-                    class="w-full px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <input type="text" id="searchGlobalMobile" placeholder="Search teams..."
+                    class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400" />
                 <span class="absolute right-3 top-2.5">🔍</span>
+
+                <!-- Dropdown -->
+                <ul id="searchDropdownMobile"
+                    class="absolute left-0 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg hidden z-50">
+                </ul>
             </div>
-            <!-- Create -->
-            <a href="http://localhost:3000/api/client/create-room"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 dark:hover:bg-blue-500 transition w-full">
-                🚀 Create room
-            </a>
-            <!-- Links -->
-            <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">Home</a>
-            <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">Features</a>
-            <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">About</a>
+
+        </div>
+        <!-- Create -->
+        <!-- <a href="http://localhost:3000/api/client/create-room"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 dark:hover:bg-blue-500 transition w-full">
+            🚀 Create room
+        </a> -->
+        <!-- Links -->
+        <!-- <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">Home</a>
+        <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">Features</a>
+        <a href="#" class="block hover:text-blue-600 dark:hover:text-blue-400">About</a> -->
         </div>
 
     </header>
@@ -81,8 +93,6 @@
         });
     </script>
 
-
-
     <!-- Main Layout -->
     <div class="flex flex-1 overflow-hidden">
 
@@ -91,7 +101,7 @@
             class="w-full md:w-1/3 lg:w-1/4 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto transition-all">
             <!-- Search Bar -->
             <div class="p-3">
-                <input type="text" placeholder="Search teams..."
+                <input type="text" id="searchTeamClientSide" placeholder="Search teams..."
                     class="w-full px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
             </div>
             <!-- Chats -->
@@ -114,7 +124,6 @@
 
             <!-- Messages (scrollable) -->
             <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3">
-                <p class="text-gray-400 text-center">No chat selected</p>
             </div>
 
             <!-- Input Bar (BOTTOM, fixed in layout) -->
@@ -144,11 +153,16 @@
         };
         document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
 
+        let currentTeam = null
         // Open Chat
-        function openChat(teamName) {
+        function openChat(teamName , token , socket) {
+            currentTeam = teamName
             document.getElementById("chat-title").innerText = teamName;
             document.getElementById("chat-list").classList.add("hidden");
             document.getElementById("chat-area").classList.remove("hidden");
+            document.getElementById("messages").innerHTML = "";
+            socket.emit('joinRoom' , teamName , socket , token);
+            return
         }
 
         // Back button for mobile
@@ -175,6 +189,35 @@
             messages.scrollTop = messages.scrollHeight; // auto scroll
         }
     </script>
+    <script> // for searching teams in the sidebar locally
+        const searchInput = document.getElementById("searchTeamClientSide");
+
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value.trim().toLowerCase();
+            const rooms = document.querySelectorAll("#team-list li");
+
+            rooms.forEach(li => {
+                const roomName = li.querySelector(".roomName").innerText.toLowerCase();
+
+                if (query && roomName.includes(query)) {
+                    // Add highlight
+                    li.classList.add("bg-blue-100", "dark:bg-blue-800");
+
+                    // Remove highlight after 2 seconds
+                    setTimeout(() => {
+                        li.classList.remove("bg-blue-100", "dark:bg-blue-800");
+                    }, 2000);
+                }
+            });
+            // Example helper for system messages
+        });
+        function appendSystemMessage(msg) {
+                const messages = document.getElementById("messages");
+                const div = document.createElement("div");
+                div.innerHTML = `<p class="text-center text-gray-100 italic z-99">${msg}</p>`
+                messages.appendChild(div);
+            }
+    </script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const token = document.cookie.split("=")[1]
@@ -187,6 +230,7 @@
             const userName = "<%= userName %>"
             socket.emit('fetch-userData', userName)
         })
+        //  data fetch from server
         socket.on('user-dataFetched', (teamArr) => {
             teamArr = [...JSON.parse(teamArr)]
             if (!teamArr.length) {
@@ -195,19 +239,46 @@
             }
             const ul = document.getElementById("team-list");
             ul.innerHTML = ""
-            console.log(typeof teamArr);
             teamArr.forEach(team => {
+                console.log(`team is ${team}`);
+                if (!team) {
+                    const ul = document.getElementById("team-list");
+
+                    // always clear out loading skeletons before appending first real team
+                    if (ul.innerHTML.includes("animate-pulse")) {
+                        ul.innerHTML = "";
+                    }
+                    const li = document.createElement("li");
+                    li.className =
+                        "p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
+                    li.innerHTML = `
+                <h3 class="font-semibold roomName">No teams joined yet</h3>
+                `;
+                    ul.appendChild(li);
+                    return
+                }
                 appendTeam(team)
             });
-            setTimeout(socket.emit('Fetch-complete'), 1000)
-            socket.on('newUser', (socketID) => {
-                console.log("New user Connected to the Room ", socketID);
-            })
-            socket.on('gotMsg', (msg) => {
-                appendIncomingMessage(msg)
+            setTimeout(() => {
+                socket.emit('Fetch-complete'), 1000
             })
         })
-        function showLoadingTeams(count = 5) {
+        socket.on('user-joined' , (userName) => {
+            console.log(`${userName} has joined the room`);
+            appendSystemMessage(`${userName} has joined the room`);
+        })
+        socket.on('gotMsg', (msg, serverToken) => {
+            if (serverToken !== token) {
+                console.log(`message comming is ${msg}`);                
+                appendIncomingMessage(msg)
+                return ;
+            }
+        })
+        socket.on('new-user-joined', (userName) => {
+            console.log("user joined event received : ", userName);            
+            appendSystemMessage(`${userName} has joined the room`)
+        })
+        function showLoadingTeams(count) {
             const ul = document.getElementById("team-list");
             ul.innerHTML = ""; // Clear old stuff
 
@@ -231,7 +302,7 @@
             if (ul.innerHTML.includes("animate-pulse")) {
                 ul.innerHTML = "";
             }
-
+            const token = document.cookie.split("=")[1]
             const li = document.createElement("li");
             li.className =
                 "p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer";
@@ -242,21 +313,76 @@
         </p>
     `;
             li.addEventListener("click", () => {
-                const Room = document.querySelector('.roomName').innerText
-                socket.emit('joinRoom', Room, socket.id);
-                openChat(team.teamName)
+                socket.emit('joinRoom', team.teamName, socket.id, token);
+                openChat(team.teamName , socket.id , token)
             }
             );
             ul.appendChild(li);
+            return ;
         }
-
-        document.getElementById('sendbtn').addEventListener('click', () => {
+        document.getElementById('sendbtn').addEventListener('click', (elm) => {
+            console.log(elm);            
             const msg = document.getElementById('msgInputbtn')
-            const roomTitle = document.getElementById('chat-title').innerText
             appendOutgoingMessage(msg.value.trim())
-            socket.emit('send-msg', msg, roomTitle)
+            socket.emit('send-msg', msg.value.trim(), currentTeam, token)
             msg.value = ""
         })
+        
+        // for global team search
+        function setupSearch(inputId, dropdownId) {
+            const searchInput = document.getElementById(inputId);
+            const searchDropdown = document.getElementById(dropdownId);
+
+            let searchTimeout;
+
+            searchInput.addEventListener("input", () => {
+                const query = searchInput.value.trim();
+
+                clearTimeout(searchTimeout);
+
+                if (!query) {
+                    searchDropdown.classList.add("hidden");
+                    searchDropdown.innerHTML = "";
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    socket.emit("search-teams", query);
+                }, 300);
+            });
+            socket.on("search-results", (teams) => {
+                console.log('search-results', teams);
+                searchDropdown.innerHTML = "";
+
+                if (!teams.length) {
+                    searchDropdown.classList.add("hidden");
+                    return;
+                }
+
+                teams.forEach(team => {
+                    const li = document.createElement("li");
+                    li.className =
+                        "px-4 py-2 hover:bg-blue-100 dark:hover:bg-blue-800 cursor-pointer";
+                    li.textContent = team.teamName;
+
+                    li.addEventListener("click", () => {
+                        socket.emit("joinUser", team.teamName, socket.id, token);
+                        openChat(team.teamName , socket.id , token);
+                        searchDropdown.classList.add("hidden");
+                        searchDropdown.innerHTML = "";
+                        searchInput.value = "";
+                    });
+
+                    searchDropdown.appendChild(li);
+                });
+                searchDropdown.classList.remove("hidden");
+                searchDropdown.classList.add('z-99')
+            });
+        }
+
+        setupSearch("searchGlobal", "searchDropdown");       // desktop
+        setupSearch("searchGlobalMobile", "searchDropdownMobile"); // mobile
+
     </script>
 </body>
 

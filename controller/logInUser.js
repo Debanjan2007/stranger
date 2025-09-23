@@ -5,7 +5,7 @@ import { asyncHandler } from '../utils//asynchandler.js'
 const logInUser = asyncHandler(async (req , res) => {
     const { email , password} = req.body
     const user = await User.findOne({ email })
-    const pass = await user.isPasswordMatched(password)
+    const pass = await user.isPasswordMatched(password)  
     if(!pass){
         return res
         .json({ success: false, error: "unauthorized" })
